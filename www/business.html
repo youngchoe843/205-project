@@ -1,0 +1,183 @@
+<!doctype html>
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script src="js/polyfill.js"></script>
+</head>
+<body style="overflow-y:hidden">
+  <script>
+var d3 = Plotly.d3;
+var WIDTH_IN_PERCENT_OF_PARENT = 100,
+    HEIGHT_IN_PERCENT_OF_PARENT = 100;
+var gd3 = d3.select('body')
+    .append('div')
+    .style({
+        width: WIDTH_IN_PERCENT_OF_PARENT + '%',
+        'margin-left': (100 - WIDTH_IN_PERCENT_OF_PARENT) / 2 + '%',
+        height: HEIGHT_IN_PERCENT_OF_PARENT + 'vh',
+        'margin-top': (100 - HEIGHT_IN_PERCENT_OF_PARENT) / 2 + 'vh'
+    });
+var gd = gd3.node();
+var colors = {
+  BA: 'rgb(0,116,217)',
+  LMT: 'rgb(255,0,85)',
+  GM: 'rgb(255,0,245)',
+  TM: 'rgb(186,27,218)',
+  JWN: 'rgb(255,153,51)',
+  FOX: 'rgb(0,255,50)',
+  MEDIA: 'rgb(255,255,0)',
+}
+var tweet_dates = [
+  { text: "Boeing Tweet",
+    date: '2016-12-06' },
+  { text: "Lockheed Martin Tweet",
+    date: '2016-12-19' },
+  { text: "General Motors Tweet",
+    date: '2017-01-03' },
+  { text: "Toyota Tweet",
+    date: '2017-01-06' },
+  { text: "Nordstrom Tweet",
+    date: '2017-02-08' }]
+var stocks = {}
+var stock_xhr = new XMLHttpRequest()
+stock_xhr.onreadystatechange = function() { if (stock_xhr.readyState===4) if (stock_xhr.status===200)
+{
+  var payload = eval(stock_xhr.responseText), tickers = [], counts = [], i = 0;
+  for (; i < payload.length; ++i) if (i % 2 === 0) { if (payload[i].length > 5) break; tickers.push(payload[i]); } else { counts.push(payload[i]) }
+  for (var ticker in tickers)
+  {
+    var xvals = [], yvals = [], option = document.createElement('option')
+    for (var j = 0; j < 2*counts[ticker]; ++i, ++j) if (i % 2 === 0) { xvals.push(payload[i]); } else { yvals.push(payload[i]) }
+    stocks[tickers[ticker]] = {x:xvals, y:yvals, type: 'scatter'}
+  }
+  stocks['MEDIA'] = {x:stocks['CBS'].x, y:[], type: 'scatter'}
+  var media = ['CBS', 'TWX', 'NWS', 'DISCA','SNI']
+  for (var i in stocks['CBS'].y) { stocks['MEDIA'].y.push(media.map(function(ticker) {return stocks[ticker].y[i]}).reduce(function(a,b) {return a+b})/media.length) }
+  console.log(stocks)
+
+  var trace1      =          stocks['BA'];
+      trace1.line = { color: colors['BA'] }
+      trace1.name = 'Boeing'
+
+  var trace2      =          stocks['LMT'];
+      trace2.line = { color: colors['LMT'] }
+      trace2.name = 'Lockheed Martin'
+
+  var trace3      =          stocks['GM'];
+      trace3.line = { color: colors['GM'] }
+      trace3.name = 'General Motors'
+
+  var trace4      =          stocks['TM'];
+      trace4.line = { color: colors['TM'] }
+      trace4.name = 'Toyota'
+
+  var trace5      =          stocks['JWN'];
+      trace5.line = { color: colors['JWN'] }
+      trace5.name = 'Nordstorm'
+
+  var trace6      =          stocks['FOX'];
+      trace6.line = { color: colors['FOX'] }
+      trace6.name = 'Fox'
+
+  var trace7      =          stocks['MEDIA'];
+      trace7.line = { color: colors['MEDIA'] }
+      trace7.name = 'Avg. Media Stocks'
+
+  var point1 = {
+    type: 'scatter',
+    x: [tweet_dates[0].date],
+    y: [stocks['BA'].y[stocks['BA'].x.indexOf(tweet_dates[0].date)]],
+    mode: 'markers',
+    marker: { color: trace1.line.color },
+    hoverinfo: 'x+text',
+    name: tweet_dates[0].text.replace(/(.*) (\w+)$/,'$2 On $1'),
+    tweetid: 806134244384899072,
+    text: 'Boeing is building a brand new 747 Air Force One for future presidents, but costs are out of control, more than $4 billion. Cancel order!'
+  };
+
+  var point2 = {
+    type: 'scatter',
+    x: [tweet_dates[1].date],
+    y: [stocks['LMT'].y[stocks['LMT'].x.indexOf(tweet_dates[1].date)]],
+    mode: 'markers',
+    marker: { color: trace2.line.color },
+    hoverinfo: 'x+text',
+    name: tweet_dates[1].text.replace(/(.*) (\w+)$/,'$2 On $1'),
+    tweetid: 812061677160202240,
+    text: 'Based on the tremendous cost and cost overruns of the Lockheed Martin F-35, I have asked Boeing to price-out a comparable F-18 Super Hornet!'
+  };
+
+  var point3 = {
+    type: 'scatter',
+    x: [tweet_dates[2].date],
+    y: [stocks['GM'].y[stocks['GM'].x.indexOf(tweet_dates[2].date)]],
+    mode: 'markers',
+    marker: { color: trace3.line.color },
+    hoverinfo: 'x+text',
+    name: tweet_dates[2].text.replace(/(.*) (\w+)$/,'$2 On $1'),
+    tweetid: 816260343391514624,
+    text: 'General Motors is sending Mexican made model of Chevy Cruze to U.S. car dealers-tax free across border. Make in U.S.A.or pay big border tax!'
+  };
+
+  var point4 = {
+    type: 'scatter',
+    x: [tweet_dates[3].date],
+    y: [stocks['TM'].y[stocks['TM'].x.indexOf(tweet_dates[3].date)]],
+    mode: 'markers',
+    marker: { color: trace4.line.color },
+    hoverinfo: 'x+text',
+    name: tweet_dates[3].text.replace(/(.*) (\w+)$/,'$2 On $1'),
+    tweetid: 817071792711942145,
+    text: 'Toyota Motor said will build a new plant in Baja, Mexico, to build Corolla cars for U.S. NO WAY! Build plant in U.S. or pay big border tax.'
+  };
+
+  var point5 = {
+    type: 'scatter',
+    x: [tweet_dates[4].date],
+    y: [stocks['JWN'].y[stocks['JWN'].x.indexOf(tweet_dates[4].date)]],
+    mode: 'markers',
+    marker: { color: trace5.line.color },
+    hoverinfo: 'x+text',
+    name: tweet_dates[4].text.replace(/(.*) (\w+)$/,'$2 On $1'),
+    tweetid: 829356871848951809,
+    text: 'My daughter Ivanka has been treated so unfairly by @Nordstrom. She is a great person -- always pushing me to do the right thing! Terrible!'
+  };
+
+  var data = [trace1, trace2, trace3, trace4, trace5, trace6, trace7, point1, point2, point3, point4, point5]
+  var layout = {
+    title: 'Stock Prices for Affected Companies',
+    xaxis: { range:[(new Date('2016-11-01')).toISOString(), (new Date()).toISOString()] },
+    yaxis: { title: 'Stock Price',
+            color: 'rgb(0,116,217)'},
+    annotations: [
+      { text: tweet_dates[0].text,
+        x:    tweet_dates[0].date,
+        y:    point1.y[0],
+        xref: 'x', yref: 'y', },
+      { text: tweet_dates[1].text,
+        x:    tweet_dates[1].date,
+        y:    point2.y[0],
+        xref: 'x', yref: 'y', },
+      { text: tweet_dates[2].text,
+        x:    tweet_dates[2].date,
+        y:    point3.y[0],
+        xref: 'x', yref: 'y', },
+      { text: tweet_dates[3].text,
+        x:    tweet_dates[3].date,
+        y:    point4.y[0],
+        xref: 'x', yref: 'y', },
+      { text: tweet_dates[4].text,
+        x:    tweet_dates[4].date,
+        y:    point5.y[0],
+        xref: 'x', yref: 'y', },
+    ],
+  };
+
+  Plotly.plot(gd, data, layout);
+} else {console.log(stock_xhr)} }
+stock_xhr.open('GET','https://s3.amazonaws.com/bas-w205-project/stocks.json?'+(new Date()).getTime(), true)
+stock_xhr.send(null, true)
+window.onresize = function() { Plotly.Plots.resize(gd) };
+  </script>
+</body>

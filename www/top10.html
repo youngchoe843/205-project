@@ -1,0 +1,206 @@
+<!doctype html>
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script src="js/polyfill.js"></script>
+</head>
+<body style="overflow-y:hidden">
+  <div class="container-fluid">
+    <form class="form-inline">
+      <div class="form-group">
+        <label class="sr-only" for="trends_option">Search trend term</label>
+        <div class="input-group">
+          <div class="input-group-addon">Search trend term</div>
+          <select class="form-control dropdown" id="trends_option"></select>
+        </div>
+        <label class="sr-only" for="stocks_option">Stock ticker</label>
+        <div class="input-group">
+          <div class="input-group-addon">Stock ticker</div>
+          <select class="form-control dropdown" id="stocks_option"></select>
+        </div>
+        <label class="sr-only" for="ratings_option">Approval rating source</label>
+        <div class="input-group">
+          <div class="input-group-addon">Approval rating source</div>
+          <select class="form-control dropdown" id="ratings_option"></select>
+        </div>
+      </div>
+      <a class="btn btn-primary" id="submit">Update charts</a>
+    </form>
+  </div>
+  <script>
+var d3 = Plotly.d3;
+var WIDTH_IN_PERCENT_OF_PARENT = 100,
+    HEIGHT_IN_PERCENT_OF_PARENT = 100;
+var gd3 = d3.select('body')
+    .append('div')
+    .style({
+        width: WIDTH_IN_PERCENT_OF_PARENT + '%',
+        'margin-left': (100 - WIDTH_IN_PERCENT_OF_PARENT) / 2 + '%',
+        height: HEIGHT_IN_PERCENT_OF_PARENT + 'vh',
+        'margin-top': (100 - HEIGHT_IN_PERCENT_OF_PARENT) / 2 + 'vh'
+    });
+var gd = gd3.node();
+
+var actionCount = [214374,158864,132668,129721,129481,125163,124414,120926,115790,114478];
+
+var trace1 = {
+  x: ['2017-02-09 15:35:49','2017-03-04 04:02:48','2017-01-22 06:23:17','2017-02-17 13:48:22','2017-02-03 15:08:38','2017-02-08 07:51:01','2017-02-04 06:26:10','2017-02-01 04:50:16','2017-01-29 05:08:18','2017-01-29 07:03:58'],
+  y: Array(10).fill(0),
+  mode: 'markers',
+  marker: {
+    color: ['rgb(94,169,177)','rgb(202,120,138)','rgb(91,157,209)','rgb(93,165,187)','rgb(91,155,213)','rgb(94,168,179)','rgb(96,178,154)','rgb(210,117,132)','rgb(163,132,165)','rgb(208,118,134)'],
+    size: actionCount.map(function(x) {return x * .0004}),
+    opacity:  [0.64018,0.82528,0.4294,0.57202,0.4,0.62716,0.79528,0.85588,0.67444,0.84736],
+  },
+  text: [0.4003,-0.7088,0.049,0.2867,0,0.3786,0.6588,-0.7598,-0.4574,-0.7456],
+  hoverinfo: 'x+text'
+};
+
+var trace3 = {
+  x: ['2017-02-09 15:35:49','2017-03-04 04:02:48','2017-01-22 06:23:17','2017-02-17 13:48:22','2017-02-03 15:08:38','2017-02-08 07:51:01','2017-02-04 06:26:10','2017-02-01 04:50:16','2017-01-29 05:08:18','2017-01-29 07:03:58'],
+  y: [1,2,2,3,1,2,2,1,1,1],
+  text: ['SEE YOU IN COURT, THE SECURITY OF OUR NATION IS AT STAKE!',
+  'How low has President Obama gone to tapp my phones during the very sacred election process. This is Nixon/Watergate. Bad (or sick) guy!',
+  'Peaceful protests are a hallmark of our democracy. Even if I don\'t always agree, I recognize the rights of people to express their views.',
+  'The FAKE NEWS media (failing @nytimes, @NBCNews, @ABC, @CBS, @CNN) is not my enemy, it is the enemy of the American People!',
+  'We must keep "evil" out of our country!',
+  'My daughter Ivanka has been treated so unfairly by @Nordstrom. She is a great person -- always pushing me to do the right thing! Terrible!',
+  'MAKE AMERICA GREAT AGAIN!',
+  'Everybody is arguing whether or not it is a BAN. Call it what you want, it is about keeping bad people (with bad intentions) out of country!',
+  'Our country needs strong borders and extreme vetting, NOW. Look what is happening all over Europe and, indeed, the world - a horrible mess!',
+  'Christians in the Middle-East have been executed in large numbers. We cannot allow this horror to continue!'],
+  marker: {
+    color: ['rgb(94,169,177)','rgb(202,120,138)','rgb(91,157,209)','rgb(93,165,187)','rgb(91,155,213)','rgb(94,168,179)','rgb(96,178,154)','rgb(210,117,132)','rgb(163,132,165)','rgb(208,118,134)'] },
+  xaxis: 'x3',
+  yaxis: 'y3',
+  mode: 'markers',
+  type: 'scatter',
+  hoverinfo: 'text'
+};
+
+var xrange = ['2017-01-20', (new Date()).toISOString().replace(/T.*/,'')]
+var data = [trace1, {}, trace3, {}, {}];
+
+var layout = {
+  title: 'Top 10 Most Interacted Tweets',
+  showlegend: false,
+  // height: 1200,
+  // width: 2000,
+  xaxis: { range: xrange },
+  yaxis: { tickfont: { color: 'white' },
+           domain: [0.75, 0.9]},
+  xaxis2: { range: xrange,
+            anchor: 'y2' },
+  yaxis2: { title: 'Approval Rating',
+            range: [0, 100],
+            domain: [0, 0.2]},
+  xaxis3: { range: xrange,
+            anchor: 'y3' },
+  yaxis3: { tickvals: [1, 2, 3],
+            ticktext: ['Immigration', 'Presidential', 'Media'],
+            // range: [1, 3],
+            domain: [0.95, 1]},
+  xaxis4: { range: xrange,
+            anchor: 'y4' },
+  yaxis4: { title: '$',
+            domain: [0.25, 0.45]},
+  xaxis5: { range: xrange,
+            anchor: 'y5' },
+  yaxis5: { title: 'Search Trend',
+            domain: [0.5, 0.7]},
+};
+
+//Plotly.newPlot('myDiv', data, layout);
+Plotly.newPlot(gd, data, layout);
+
+var stocks = {}
+var update_stock = function(ticker)
+{
+  Plotly.deleteTraces(gd, 3)
+  Plotly.addTraces(gd, stocks[ticker],3)
+  Plotly.relayout(gd, {'yaxis4.title': '$'+ticker})
+}
+var stock_xhr = new XMLHttpRequest()
+stock_xhr.onreadystatechange = function() { if (stock_xhr.readyState===4) if (stock_xhr.status===200)
+{
+  var payload = eval(stock_xhr.responseText), select = document.getElementById('stocks_option'), tickers = [], counts = [], i = 0;
+  for (; i < payload.length; ++i) if (i % 2 === 0) { if (payload[i].length > 5) break; tickers.push(payload[i]); } else { counts.push(payload[i]) }
+  for (var ticker in tickers)
+  {
+    var xvals = [], yvals = [], option = document.createElement('option')
+    for (var j = 0; j < 2*counts[ticker]; ++i, ++j) if (i % 2 === 0) { xvals.push(payload[i]); } else { yvals.push(payload[i]) }
+    stocks[tickers[ticker]] = {x:xvals, y:yvals, xaxis: 'x4', yaxis: 'y4', type: 'scatter', hoverinfo: 'x+y',}
+    option.value = tickers[ticker]
+    option.innerHTML = tickers[ticker]
+    select.appendChild(option)
+  }
+  update_stock(tickers[0])
+} else {console.log(stock_xhr)} }
+stock_xhr.open('GET','https://s3.amazonaws.com/bas-w205-project/stocks.json?'+(new Date()).getTime(), true)
+stock_xhr.send(null, true)
+
+var ratings = {}
+var update_rating = function(source)
+{
+  Plotly.deleteTraces(gd, 1)
+  Plotly.addTraces(gd, ratings[source], 1)
+  Plotly.relayout(gd, {'yaxis2.title': 'Approval Rating ('+source+')'})
+}
+var rating_xhr = new XMLHttpRequest()
+rating_xhr.onreadystatechange = function() { if (rating_xhr.readyState===4) if (rating_xhr.status===200)
+{
+  var payload = eval(rating_xhr.responseText), select = document.getElementById('ratings_option'), sources = [], counts = [], i = 0;
+  for (; i < payload.length; ++i) if (i % 2 === 0) { if (payload[i].match(/\d{8}/)) break; sources.push(payload[i].replace(/\w/i, function(c) {return c.toUpperCase()})); } else { counts.push(payload[i]) }
+  for (var source in sources)
+  {
+    var xvals = [], yvals = [], option = document.createElement('option')
+    for (var j = 0; j < 2*counts[source]; ++i, ++j) if (i % 2 === 0) { xvals.push(payload[i].replace(/(\d{4})(\d{2})(\d{2})/,"$1-$2-$3")); } else { yvals.push(payload[i]) }
+    ratings[sources[source]] = {x:xvals, y:yvals, xaxis: 'x2', yaxis: 'y2', type: 'scatter', hoverinfo: 'x+y',}
+    option.value = sources[source]
+    option.innerHTML = sources[source]
+    select.appendChild(option)
+  }
+  update_rating(sources[0])
+} else {console.log(rating_xhr)} }
+rating_xhr.open('GET','https://s3.amazonaws.com/bas-w205-project/ratings.json?'+(new Date()).getTime(), true)
+rating_xhr.send(null, true)
+
+var trends = {}
+var keywords = ['travel.state.gov','ustraveldocs','ds 160']
+for (var keyword in keywords)
+{
+  trends[keywords[keyword]] = {x:[], y:[], xaxis: 'x5', yaxis: 'y5', type: 'scatter', hoverinfo: 'x+y',}
+  var option = document.createElement('option')
+  option.value = keywords[keyword]
+  option.innerHTML = keywords[keyword]
+  document.getElementById('trends_option').appendChild(option)
+}
+
+var update_trend = function(keyword)
+{
+  Plotly.deleteTraces(gd, 4)
+  Plotly.addTraces(gd, trends[keyword], 4)
+  Plotly.relayout(gd, {'yaxis5.title': '"'+keyword+'" Search Trend'})
+}
+var trend_xhr = new XMLHttpRequest()
+trend_xhr.onreadystatechange = function() { if (trend_xhr.readyState===4) if (trend_xhr.status===200)
+{
+  var xval = ''
+  var payload = eval(trend_xhr.responseText), counts = [], chunk_size = 1 + keywords.length;
+  for (var i = 0; i < payload.length; ++i) if (i % chunk_size === 0) { xval = payload[i]; } else { trends[keywords[(i % chunk_size) - 1]].x.push(xval); trends[keywords[(i % chunk_size) - 1]].y.push(payload[i]) }
+  update_trend(keywords[0])
+} else {console.log(trend_xhr)} }
+trend_xhr.open('GET','https://s3.amazonaws.com/bas-w205-project/trends.json?'+(new Date()).getTime(), true)
+trend_xhr.send(null, true)
+
+window.onresize = function() { Plotly.Plots.resize(gd) };
+document.getElementById('submit').onclick = function()
+{
+  update_stock(document.getElementById('stocks_option').value)
+  update_rating(document.getElementById('ratings_option').value)
+  update_trend(document.getElementById('trends_option').value)
+}
+  </script>
+</body>

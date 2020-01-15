@@ -1,0 +1,123 @@
+<!doctype html>
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script src="js/polyfill.js"></script>
+  <script src="js/colorscheme.js"></script>
+</head>
+<body style="overflow-y:hidden">
+  <script>
+var new_gd = function()
+{
+  var WIDTH_IN_PERCENT_OF_PARENT = 100,
+      HEIGHT_IN_PERCENT_OF_PARENT = 100.0/3
+  return Plotly.d3.select('body')
+      .append('div')
+      .style({
+          width: WIDTH_IN_PERCENT_OF_PARENT + '%',
+          'margin-left': (100 - WIDTH_IN_PERCENT_OF_PARENT) / 2 + '%',
+          height: HEIGHT_IN_PERCENT_OF_PARENT + 'vh',
+          'margin-top': 0 + 'vh'
+      }).node()
+}
+var gd_vol = new_gd()
+var gd_sent = new_gd()
+var gd_rank = new_gd()
+var xaxis = { range:[(new Date('2017-04-10')).toISOString(), (new Date()).toISOString()] }
+var xhr_vol = new XMLHttpRequest()
+xhr_vol.onreadystatechange = function() { if (xhr_vol.readyState===4) if (xhr_vol.status===200)
+{
+  var xvals = [], yvals = [], topics = [], data = [], string_el = true;
+  var active_topic = function() { return topics.slice(-1).pop() }
+  var add_trace = function() { if (i > 0) { topics.push(active_topic()); data.push({
+      x:xvals,
+      y:yvals,
+      mode:'lines',
+      name:active_topic()
+    }); xvals = []; yvals = [] } }
+  var payload = eval(xhr_vol.responseText)
+  if (payload.length === 0) { return }
+  for (var i = 0; i < payload.length; ++i)
+  {
+    if (string_el && payload[i].match(/\d{4}(-\d{2}){2}/) === null) { add_trace(); topics.push(payload[i++]) }
+    if (string_el) { xvals.push(new Date(payload[i])) } else { yvals.push(payload[i]) }
+    string_el = !string_el
+  }
+  add_trace()
+  Plotly.newPlot(gd_vol, data, {
+    title: 'Hot Topics of Tweets Containing \'Trump\'',
+    xaxis: xaxis,
+    yaxis: { title:'Tweet Volume'} })
+} else {console.log(xhr_vol)} }
+xhr_vol.open('GET','https://s3.amazonaws.com/bas-w205-project/topichot.json?'+(new Date()).getTime(), true)
+xhr_vol.send(null)
+
+var xhr_sent = new XMLHttpRequest()
+xhr_sent.onreadystatechange = function() { if (xhr_sent.readyState===4) if (xhr_sent.status===200)
+{
+  var xvals = [], yvals = [], topics = [], data = [], string_el = true;
+  var active_topic = function() { return topics.slice(-1).pop() }
+  var add_trace = function() { if (i > 0) { topics.push(active_topic()); data.push({
+      x:xvals,
+      y:yvals,
+      mode:'lines',
+      name:active_topic()
+    }); xvals = []; yvals = [] } }
+  var payload = eval(xhr_sent.responseText)
+  if (payload.length === 0) { return }
+  for (var i = 0; i < payload.length; ++i)
+  {
+    if (string_el && payload[i].match(/\d{4}(-\d{2}){2}/) === null) { add_trace(); topics.push(payload[i++]) }
+    if (string_el) { xvals.push(new Date(payload[i])) } else { yvals.push(payload[i]) }
+    string_el = !string_el
+  }
+  add_trace()
+  Plotly.newPlot(gd_sent, data, {
+    title: 'Sentiment of Hot Topics of Tweets Containing \'Trump\'',
+    xaxis: xaxis,
+    yaxis: { title:'Average Tweet Sentiment'} })
+} else {console.log(xhr_sent)} }
+xhr_sent.open('GET','https://s3.amazonaws.com/bas-w205-project/topichotsent.json?'+(new Date()).getTime(), true)
+xhr_sent.send(null)
+
+var xhr_rank = new XMLHttpRequest()
+xhr_rank.onreadystatechange = function() { if (xhr_rank.readyState===4) if (xhr_rank.status===200)
+{
+  var add_set = function(key) {if (!dataset.hasOwnProperty(key)) {dataset[key] = {x:[],y:[]}}}
+  var dataset = {}, data = [], xvals = {}, xval = null, ymax = 0, yval = null, topic = null, dates = []
+  var payload = eval(xhr_rank.responseText)
+  if (payload.length === 0) { return }
+  for (var i = 0; i < payload.length; ++i) switch (i % 3) { case 0: { topic=payload[i]; add_set(topic) }; break; case 1: { xval=payload[i]; xvals[xval]={} }; break; case 2: { dataset[topic].x.push(xval); yval=payload[i]; dataset[topic].y.push(yval); ymax = Math.max(ymax, yval) }; default: break; }
+  for (var x in xvals) { dates.push(x) }
+  dates.sort()
+  colors = colorscheme.get(Object.keys(dataset).length)
+  for (var topic in dataset)
+  {
+    var trace = {
+      x: [],
+      y: [],
+      name: topic,
+      marker: { color: colors.shift() },
+      mode: 'markers+lines',
+      hoverinfo: 'x+name',
+      connectgaps: false,
+    }
+    for (var date in dates) { var i = dataset[topic].x.indexOf(dates[date]); trace.x.push(new Date(dates[date])); trace.y.push(i === -1 ? null : ymax + 1 - dataset[topic].y[i]) }
+    data.push(trace)
+  }
+  var layout = {
+    title: 'Daily Top 5 Topics of Tweets Containing \'Trump\'',
+    xaxis: xaxis,
+    yaxis: { title:'Topic Daily Rank',
+             range: [1-.1, ymax+.1],
+             tickvals: Array(ymax).fill(0).map(function(el,id) { return 1+id }) } }
+  layout.yaxis.ticktext = layout.yaxis.tickvals.reverse().map(function(el){return (ymax + 1 - el)})
+  layout.yaxis.ticktext = layout.yaxis.ticktext.map(function(el){return el+(el%10===0||el%10>4||((el/10)%10===1)?'ᵗʰ':el%10===1?'ˢᵗ':el%10===2?'ⁿᵈ':'ʳᵈ')})
+  Plotly.newPlot(gd_rank, data, layout)
+} else {console.log(xhr_rank)} }
+xhr_rank.open('GET','https://s3.amazonaws.com/bas-w205-project/topichotrank.json?'+(new Date()).getTime(), true)
+xhr_rank.send(null)
+window.onresize = function() { Plotly.Plots.resize(gd_vol); Plotly.Plots.resize(gd_sent); Plotly.Plots.resize(gd_rank) };
+  </script>
+</body>

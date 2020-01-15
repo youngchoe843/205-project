@@ -1,0 +1,32 @@
+
+
+#       *     *     *   *    *        command to be executed
+#       -     -     -   -    -
+#       |     |     |   |    |
+#       |     |     |   |    +----- day of week (0 - 6) (Sunday=0)
+#       |     |     |   +------- month (1 - 12)
+#       |     |     +--------- day of        month (1 - 31)
+#       |     +----------- hour (0 - 23)
+#       +------------- min (0 - 59)
+
+
+# stocks cron jobs.  run at 12:00 UTC, which is 5am PST
+0 12 * * * cd /data/w205-project/stocks && /usr/bin/python /data/w205-project/stocks/getStocks.py
+5 12 * * * cd /data/w205-project/stocks && /usr/bin/python /data/w205-project/stocks/plotStocks.py
+
+# topic count cron jobs. run at 12:15 UTC, which is 5:15 AM PST
+15 12 * * * cd /data/w205-project/topicCount && /usr/bin/python /data/w205-project/topicCount/refreshCount.py
+25 12 * * * cd /data/w205-project/topicCount && usr/bin/python /data/w205-project/topicCount/plotCount.py
+
+# daily analytics serving script. run at 12:30 UTC, which is 5:30 AM PST
+30 12 * * * cd /data/w205-project && /usr/bin/bash /data/w205-project/s3cp_daily.sh
+
+# trump approvals.  run at 19:00 UTC, which is 12pm PST
+0 19 * * * cd /data/w205-project/approvals && /usr/bin/python /data/w205-project/approvals/getGallupRatings.py >> /tmp/galluplog
+4 19 * * * cd /data/w205-project/approvals && /usr/bin/python /data/w205-project/approvals/getRasmussenRatings.py >> /tmp/raslog
+7 19 * * * cd /data/w205-project/approvals && /usr/bin/python /data/w205-project/approvals/getHuffRatings.py >> /tmp/hufflog
+10 19 * * * cd /data/w205-project/approvals && /usr/bin/python /data/w205-project/approvals/plotRatings.py
+15 19 * * * cd /data/w205-project/approvals && /usr/bin/python /data/w205-project/approvals/dumpRatings.py
+
+# remove tmp directories.  run every day at 9:30 UTC, which is 2:30AM PST
+30 9 * * * rm -rf `ls -la /tmp/ | grep w205 | grep "........-....-....-....-............$" | awk '{print "/tmp/"$9}'`

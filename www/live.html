@@ -1,0 +1,65 @@
+<!doctype html>
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script src="js/polyfill.js"></script>
+</head>
+<body style="overflow-y:hidden;">
+  <div class="row" style="text-align:center;">
+  <h3>Sentiment of People in Tweets Containing 'Trump'</h3>
+  </div>
+  <div class="row">
+    <div id="graph"></div>
+    <span id="offline" class="label label-danger" style="visibility:hidden">Streaming is OFFLINE</span>
+    <span id="delayed" class="label label-warning" style="visibility:hidden">Streaming is DELAYED</span>
+  </div>
+  <div class="row">
+    <blockquote>
+      <ul>
+        <li>More positive values (typically &gt; 0.5) indicate generally positive sentiment.</li>
+        <li>More negative values (typically &lt; 0.5) indicate generally negative sentiment.</li>
+        <li>Moderate values indicate generally neutral sentiment.</ul>
+      </ul>
+      <footer>Hutto, C.J. &amp; Gilbert, E.E. (2014). <cite>VADER: A Parsimonious Rule-based Model for Sentiment Analysis of Social Media Text.</cite> Eighth International Conference on Weblogs and Social Media (ICWSM-14). Ann Arbor, MI, June 2014.</footer>
+    </blockquote>
+  </div>
+  <script>
+{ var dweet_xhr = new XMLHttpRequest(); dweet_xhr.open('GET','https://dweet.io/dweet/for/g81a9HpDiUaCn53zwtooRxkVtvP3XGtOsH2qf0m+GLOxpRNk1CsoQ4MTBP3MNOgy',true); dweet_xhr.send(null); }
+var new_layout = function() { return {xaxis: { range: [new Date(new Date() - 60*1000).toISOString(), (new Date()).toISOString()] }, yaxis:{range:[-1,1]}} }
+var page_visible = function() { var live = parent.document.getElementById('live'); return live == null || live.className.match(/active/) != null }
+var last_response = ""
+var xhr = new XMLHttpRequest()
+xhr.onreadystatechange = function() { if (xhr.readyState===4) if (xhr.status===200)
+{
+  document.getElementById('offline').style.visibility = (xhr.responseText === "") ? 'visible' : 'hidden'
+  if (xhr.responseText === "") { return }
+  if (xhr.responseText === last_response) { return } else { last_response = xhr.responseText }
+  var xvals = []
+  var yvals = []
+  var payload = eval(xhr.responseText)
+  if (payload.length === 0) { return }
+  var min_epoch = 0 + new Date()
+  for (var i = 0; i < payload.length; ++i)
+  {
+    if (i % 2 === 0) { xvals.push(new Date(1000*payload[i]).toISOString()); } else { yvals.push(payload[i]) }
+  }
+  document.getElementById('delayed').style.visibility = ((new Date())/1000 - payload[0] > 70) ? 'visible' : 'hidden'
+  Plotly.deleteTraces('graph', 0)
+  Plotly.addTraces('graph', [{ x: xvals, y: yvals, mode: 'markers', marker: {color: 'orange', size: 8}}])
+} else {console.log(xhr)} }
+var data_interval = setInterval(function() {
+  if (page_visible())
+  {
+    xhr.open('GET','https://s3.amazonaws.com/bas-w205-project/tweets_fast.json?'+(new Date()).getTime(), true)
+    xhr.send(null)
+  }
+}, 2000);
+var disp_interval = setInterval(function() {
+  if (page_visible()) Plotly.relayout('graph', new_layout())
+  //if (page_visible()) setTimeout(Plotly.animate, 0, 'graph', {layout:new_layout()},{transition:{duration:1000,easing:'linear'}})
+}, 30);
+Plotly.plot('graph', [{x: [], y: []}], new_layout());
+  </script>
+</body>

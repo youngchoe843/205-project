@@ -1,0 +1,50 @@
+<!doctype html>
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <style>
+    html, div.tab-pane, iframe { height      : 100%   }
+    body, div.content          { height      :  99.5% }
+    div.tab-content            { height      :  95%   }
+    iframe                     { width       : 100%   ;
+                                 border-style: none   }
+  </style>
+</head>
+<body>
+<div class="content">
+
+  <!-- Nav tabs -->
+  <ul class="nav nav-tabs" role="tablist">
+    <li role="presentation" class="active"><a href="#top10" aria-controls="top10" role="tab" data-toggle="tab">Top 10 Most Interacted</a></li>
+    <li role="presentation"><a href="#topics" aria-controls="topics" role="tab" data-toggle="tab">Hot Topics</a></li>
+    <li role="presentation"><a href="#business" aria-controls="business" role="tab" data-toggle="tab">Business Reputation &amp; Market Value</a></li>
+    <li role="presentation"><a href="#live" aria-controls="live" role="tab" data-toggle="tab">Live Sentiment</a></li>
+    <li role="presentation"><a href="#about" aria-controls="about" role="tab" data-toggle="tab">About</a></li>
+  </ul>
+
+  <!-- Tab panes -->
+  <div class="tab-content">
+    <div role="tabpanel" class="tab-pane active" id="top10"><iframe src="top10.html"></iframe></div>
+    <div role="tabpanel" class="tab-pane" id="topics"><iframe src="" data-src="topics.html"></iframe></div>
+    <div role="tabpanel" class="tab-pane" id="business"><iframe src="" data-src="business.html"></iframe></div>
+    <div role="tabpanel" class="tab-pane" id="live"><iframe src="" data-src="live.html"></iframe></div>
+    <div role="tabpanel" class="tab-pane" id="about"><iframe src="" data-src="about.html"></iframe></div>
+  </div>
+
+</div>
+<script>
+$('ul.nav-tabs a').click(function (e) {
+  e.preventDefault()
+  $(this).tab('show')
+  var iframe = $('iframe', $(this).attr('href'))
+  if (iframe.data('src'))
+  {
+    iframe.prop('src', iframe.data('src')).data('src', false);
+  }
+})
+</script>
+</body>
